@@ -1,0 +1,336 @@
+#include<stdio.h>
+#include<stdbool.h>
+#include<stdlib.h>
+#include<string.h>
+
+#define SIZE 50
+
+struct EntryItem {
+   int serial_number;
+   char name[20];
+   char id_type[20];
+   char data_type[20];
+   char scope[20];
+   char value[20];
+};
+
+struct EntryItem* hashTable[SIZE];
+struct EntryItem item;
+
+
+void insert(int sr, char n[], char id[], char d[], char sc[], char v[]) {
+
+   struct EntryItem *it = (struct EntryItem*) malloc(sizeof(struct EntryItem));
+   it->serial_number = sr;
+   strcpy(it->name,n);
+   strcpy(it->data_type,d);
+   strcpy(it->id_type,id);
+   strcpy(it->scope,sc);
+   strcpy(it->value,v);
+
+   int hashIndex = sr;
+
+   hashTable[hashIndex] = it;
+}
+
+int search(char n[], char scp[]) {
+
+   int hashIndex=1;
+   while(hashTable[hashIndex] != NULL) {
+      if((strcmp(hashTable[hashIndex]->name,n)==0) && (strcmp(hashTable[hashIndex]->scope,scp)==0))
+         return hashTable[hashIndex]->serial_number;
+      ++hashIndex;
+   }
+
+   return 0;
+}
+
+void update(int sr, char n[], char id[], char d[], char sc[], char v[])
+{
+    int hashIndex = sr;
+
+    if(hashTable[hashIndex]->name==" ")
+        strcpy(hashTable[hashIndex]->name,n);
+    if(hashTable[hashIndex]->id_type==" ")
+        strcpy(hashTable[hashIndex]->id_type,id);
+    if(hashTable[hashIndex]->data_type==" ")
+        strcpy(hashTable[hashIndex]->data_type,d);
+    if(hashTable[hashIndex]->scope==" ")
+        strcpy(hashTable[hashIndex]->scope,sc);
+
+    strcpy(hashTable[hashIndex]->value,v);
+}
+
+
+void display() {
+   int i=0;
+
+   printf("(Serial no.)\t(Name)\t\t(Id_Type) \t(Data_Type)\t(Scope) \t(Value)\n");
+   for(i=0; i<SIZE; i++) {
+      if(hashTable[i] != NULL)
+         printf("%d\t\t%s\t\t%s\t\t%s\t\t%s\t\t%s\n",hashTable[i]->serial_number,hashTable[i]->name, hashTable[i]->id_type, hashTable[i]->data_type, hashTable[i]->scope, hashTable[i]->value);
+   }
+
+   printf("\n");
+}
+
+struct EntryItem* delete_item(int sr){
+
+   int hashIndex = sr;
+
+   struct EntryItem *temp;
+
+   if(hashTable[hashIndex]!=NULL){
+        temp = hashTable[hashIndex];
+        hashTable[hashIndex]=NULL;
+        return temp;
+   }
+
+   return NULL;
+}
+
+
+bool isDataType(char str[])
+{
+    if(strcmp(str,"float")==0)
+        return true;
+    else if(strcmp(str,"int")==0)
+        return true;
+    else if(strcmp(str,"double")==0)
+        return true;
+    else if(strcmp(str,"char")==0)
+        return true;
+    else
+        return false;
+}
+
+int main()
+{
+    FILE *fp_read1, *fp_read2, *fp_write, *fp_read3, *fp_write_1;
+    char c, t;
+    char str_name[100], str_value[100], str_data_type[100], str_id_type[100], str_scope[100], scope[100], ch_scope[100];
+    int global, equal, k=0, bracket, serial=0, src;
+
+    fp_read1 = fopen("input3.txt","r");
+    fp_read2 = fopen("input3.txt","r");
+    fp_write = fopen("step1_output3.txt","w");
+
+    printf("Input: \n\n");
+    while((c=fgetc(fp_read1))!=EOF)
+        printf("%c",c);
+
+    printf("\n\n\nOutput of (Step-1): \n\n");
+    while((c=fgetc(fp_read2))!=EOF)
+    {
+        if(c=='['){
+            fputc(c,fp_write);
+            printf("%c",c);
+            c=fgetc(fp_read2);
+            if(c!='i')
+                while((c=fgetc(fp_read2))!=' ');
+            else{
+                fputc(c,fp_write);
+                printf("%c",c);
+            }
+            while((c=fgetc(fp_read2))!=']'){
+                fputc(c,fp_write);
+                printf("%c",c);
+            }
+            fputc(c,fp_write);
+            printf("%c",c);
+        }
+    }
+    printf("\n");
+
+    fclose(fp_read1);
+    fclose(fp_read2);
+    fclose(fp_write);
+
+    fp_read3 = fopen("step1_output3.txt","r");
+
+    global=1;
+    while((c=fgetc(fp_read3))!=-1){
+        if(c=='['){
+            c=fgetc(fp_read3);
+            if(c=='i'){
+               c=fgetc(fp_read3);
+               if(c=='d'){
+                  c=fgetc(fp_read3);
+                  k=0;
+                  while((c=fgetc(fp_read3))!=']'){
+                     str_name[k]=c;
+                     k++;
+                  }
+                  str_name[k]='\0';
+               }
+               else{
+                   k=0;
+
+                   str_data_type[k]='i';
+                   k++;
+                   str_data_type[k]=c;
+                   k++;
+                   while((c=fgetc(fp_read3))!=']'){
+                        str_data_type[k]=c;
+                        k++;
+                   }
+                   str_data_type[k]='\0';
+
+                   if(!isDataType(str_data_type)){
+                        str_data_type[0]='\0';
+                   }
+               }
+            }
+            else{
+                if(c>='a' && c<='z'){
+                    k=0;
+                    str_data_type[k]=c;
+                    k++;
+                    while((c=fgetc(fp_read3))!=']'){
+                        str_data_type[k]=c;
+                        k++;
+                    }
+                    str_data_type[k]='\0';
+
+                    if(!isDataType(str_data_type)){
+                        str_data_type[0]='\0';
+                    }
+
+                }
+                else if(c=='='){
+                    c=fgetc(fp_read3);
+                    c=fgetc(fp_read3);
+
+                    k=0;
+                    while((c=fgetc(fp_read3))!=']'){
+                        str_value[k]=c;
+                        k++;
+                    }
+                    str_value[k]='\0';
+                }
+                else{
+                    if(c==';'){
+                        ++serial;
+                        if(global)
+                            strcpy(str_scope,"global");
+                        else
+                            strcpy(str_scope,scope);
+
+                        strcpy(str_id_type,"var");
+
+                        src=search(str_name, str_scope);
+                        if(src>0){
+                            update(src, str_name, str_id_type, str_data_type, str_scope, str_value);
+                            --serial;
+                        }
+                        else{
+                            insert(serial, str_name, str_id_type, str_data_type, str_scope, str_value);
+                        }
+
+                    }
+                    else if(c=='('){
+                        strcpy(str_id_type,"func");
+
+                        if(global)
+                            strcpy(str_scope,"global");
+
+                        global=0;
+                        strcpy(scope,str_name);
+
+                        ++serial;
+                        strcpy(str_value," ");
+
+                        src=search(str_name, str_scope);
+                        if(src>0){
+                            update(src, str_name, str_id_type, str_data_type, str_scope, str_value);
+                            --serial;
+                        }
+                        else{
+                            insert(serial, str_name, str_id_type, str_data_type, str_scope, str_value);
+                        }
+
+                    }
+                    else if(c==')'){
+                        if(isDataType(str_data_type)){
+                            strcpy(str_scope,scope);
+
+                            ++serial;
+                            strcpy(str_value," ");
+                            strcpy(str_id_type,"var");
+
+                            insert(serial, str_name, str_id_type, str_data_type, str_scope, str_value);
+
+                        }
+                    }
+                    else if(c=='}'){
+                        global=1;
+                    }
+
+                }
+            }
+        }
+    }
+
+    struct EntryItem* l=delete_item(3);
+
+
+    printf("\n\n\t\t\t********** Symbol Table:************* \n\n");
+    display();
+    printf("\n");
+    fclose(fp_read3);
+
+
+
+    strcpy(ch_scope,"global");
+    global=1;
+
+    fp_read3 = fopen("step1_output3.txt","r");
+    fp_write_1 = fopen("final_output.txt","w");
+
+    while((c=fgetc(fp_read3))!=-1){
+        fputc(c,fp_write_1);
+        if(c=='['){
+            c=fgetc(fp_read3);
+            fputc(c,fp_write_1);
+            if(c=='i'){
+               c=fgetc(fp_read3);
+               fputc(c,fp_write_1);
+               if(c=='d'){
+                  c=fgetc(fp_read3);
+                  fputc(c,fp_write_1);
+                  k=0;
+                  while((c=fgetc(fp_read3))!=']'){
+                     str_name[k]=c;
+                     k++;
+                  }
+                  str_name[k]='\0';
+                  fputc(search(str_name,ch_scope)+'0',fp_write_1);
+                  fputc(']',fp_write_1);
+               }
+            }
+            else if(c=='('){
+                global=0;
+                strcpy(ch_scope,str_name);
+            }
+            else if(c=='}'){
+                global=1;
+                strcpy(ch_scope,"global");
+            }
+        }
+    }
+    fclose(fp_read3);
+    fclose(fp_write_1);
+
+    fp_read3 = fopen("final_output.txt","r");
+
+    printf("\n\nFinal Output (Step-4:)  \n\n");
+    while((c=fgetc(fp_read3))!=-1){
+        printf("%c",c);
+    }
+    printf("\n\n");
+
+    fclose(fp_read3);
+
+    return 0;
+}
+
