@@ -1,0 +1,39 @@
+#include<stdio.h>
+
+int main()
+{
+    FILE *fp;
+    char c;
+    char stck[100];
+    int line=1, top=0;
+
+    fp=fopen("input_ON4.txt","r");
+
+    while((c=fgetc(fp))!=-1){
+        if(c=='/'){
+            while((c=fgetc(fp))!='\n');
+        }
+        if(c=='\n')
+            line++;
+        if(c=='(' || c=='{'){
+            top++;
+            stck[top]=c;
+        }
+        else if(c==')' || c=='}'){
+            if(c==')'){
+                if(stck[top]!='(' || top==-1){
+                    printf("Misplaced brace:  %d\n",line);
+                }
+                top--;
+            }
+            else{
+                if(stck[top]!='{' || top==-1){
+                    printf("Misplaced brace:  %d\n",line);
+                }
+                top--;
+            }
+        }
+    }
+
+    return 0;
+}
